@@ -24,7 +24,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             ComposeGalleryTheme {
                 ComposeGallery {
-
+                    Log.d("SelectedImages", "==> $it")
                 }
             }
         }
