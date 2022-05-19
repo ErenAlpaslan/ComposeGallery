@@ -2,6 +2,7 @@ package com.erendev.composegallery
 
 import android.content.ContentResolver
 import android.text.TextUtils
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -20,16 +21,15 @@ internal class ComposeGalleryViewModel: ViewModel() {
     private lateinit var contentResolver: ContentResolver
 
     internal var mDoneEnabled = MutableLiveData<Boolean>()
-    internal var mDirectCamera = MutableLiveData<Boolean>()
-    internal var showOverLimit = MutableLiveData<Boolean>()
-    internal var mNotifyPosition = MutableLiveData<Int>()
-    internal var mNotifyInsert = MutableLiveData<Int>()
 
     private val _albums = MutableLiveData<ArrayList<AlbumItem>>()
     internal val albums: LiveData<ArrayList<AlbumItem>> = _albums
 
-    private var _lastAddedImages = MutableLiveData<ArrayList<ImageItem>>()
-    internal val lastAddedImages = _lastAddedImages
+    private val _images: MutableLiveData<List<ImageItem>> = MutableLiveData()
+    val images: LiveData<List<ImageItem>> = _images
+
+    private val _isDoneEnabled: MutableLiveData<Boolean> = MutableLiveData(false)
+    val isDoneEnabled: LiveData<Boolean> = _isDoneEnabled
 
     internal var saveStateImages = arrayListOf<ImageItem>()
     internal var mCurrentPhotoPath: String? = null
@@ -55,6 +55,7 @@ internal class ComposeGalleryViewModel: ViewModel() {
     internal fun isOverLimit() = mCurrentSelection >= mLimit
 
     internal fun loadAlbums() {
+        Log.d("CaptureControl", "=> Trying loads albums")
         if (!_albums.value.isNullOrEmpty()) {
             return
         }
@@ -70,19 +71,20 @@ internal class ComposeGalleryViewModel: ViewModel() {
     }
 
     private fun loadImages(isLoadMore: Boolean = false) {
+        Log.d("CaptureControl", "=> Trying loads images")
         if (isLoadMore) {
             mPage += 1
         } else {
             mPage = 0
         }
         viewModelScope.launch() {
-            val images = getImages()
+            val imageList = getImages()
             mCurrentSelection = mImageDataSource.selectedPosition
-            addSelectedImages(images)
+            addSelectedImages(imageList)
             if (mCurrentSelection > 0) {
                 mDoneEnabled.postValue(true)
             }
-            _lastAddedImages.value = images
+            _images.postValue(imageList)
         }
     }
 
@@ -115,6 +117,15 @@ internal class ComposeGalleryViewModel: ViewModel() {
         loadImages()
     }
 
-
-
+    internal fun addCameraItem(item: ImageItem) {
+        viewModelScope.launch {
+            mSelectedList[item.imagePath] = item
+            val list: ArrayList<ImageItem> = arrayListOf()
+            _images.value?.let {
+                list.addAll(it)
+            }
+            list.add(0, item)
+            _images.postValue(list)
+        }
+    }
 }

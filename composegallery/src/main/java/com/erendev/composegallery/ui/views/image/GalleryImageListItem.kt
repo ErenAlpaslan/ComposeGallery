@@ -1,13 +1,14 @@
 package com.erendev.composegallery.ui.views.image
 
+import android.graphics.Bitmap
 import android.net.Uri
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -21,6 +22,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import com.erendev.composegallery.data.model.ImageItem
@@ -35,19 +38,14 @@ fun GalleryImageListItem(
     onImageSelected: (ImageItem) -> Unit,
     onImageRemoved: (ImageItem) -> Unit
 ) {
-    var imageUri by remember {
-        mutableStateOf<Uri?>(
-            item.uri
-        )
-    }
-
     var isSelected by remember {
         mutableStateOf(false)
     }
 
+    isSelected = item.selected
+
     val state = remember {
         MutableTransitionState(false).apply {
-            // Start the animation immediately.
             targetState = true
         }
     }
@@ -59,14 +57,15 @@ fun GalleryImageListItem(
             exit = fadeOut(animationSpec = tween(1000))
         ) {
             GlideImage(
-                imageModel = imageUri,
-                contentScale = ContentScale.Fit,
+                imageModel = item.uri,
+                contentScale = ContentScale.FillBounds,
                 modifier = Modifier
                     .fillMaxSize()
-                    .defaultMinSize(minHeight = 150.dp)
+                    .height(150.dp)
                     .clip(RoundedCornerShape(10.dp))
                     .clickable {
                         isSelected = isSelected.not()
+                        item.selected = isSelected
                         if (isSelected) onImageSelected(item) else onImageRemoved(item)
                     },
             )

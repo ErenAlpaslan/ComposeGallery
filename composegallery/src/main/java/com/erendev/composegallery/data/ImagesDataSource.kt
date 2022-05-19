@@ -125,21 +125,21 @@ internal class ImagesDataSource(private val contentResolver: ContentResolver){
 
             while(photoCursor.moveToNext()) {
                 val image = photoCursor.getString((photoCursor.getColumnIndex(PATH_COLUMN)))
-                val id = photoCursor.getLong(photoCursor.getColumnIndexOrThrow(ID_COLUMN));
+                val id = photoCursor.getLong(photoCursor.getColumnIndexOrThrow(ID_COLUMN))
                 val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
                 Log.d("ImageSourceControl", "image ==>$image // $id // $uri")
                 if (supportedImages != null) {
                     val imageType = image.substring(image.lastIndexOf(".") + 1)
                     if (supportedImages.contains(imageType)) {
                         if (preSelectedImages == null) {
-                            list.add(ImageItem(image, ImageSource.GALLERY, uri, ImageItem.NOT_SELECTED))
+                            list.add(ImageItem(image, ImageSource.GALLERY, uri, false))
                         } else {
                             addSelectedImageToList(preSelectedImages, image, uri, list)
                         }
                     }
                 } else {
                     if (preSelectedImages == null) {
-                        list.add(ImageItem(image, ImageSource.GALLERY, uri, ImageItem.NOT_SELECTED))
+                        list.add(ImageItem(image, ImageSource.GALLERY, uri, false))
                     } else {
                         addSelectedImageToList(preSelectedImages, image, uri, list)
                     }
@@ -162,7 +162,7 @@ internal class ImagesDataSource(private val contentResolver: ContentResolver){
         if (isSelected) {
             selectedPosition += 1
         }
-        list.add(ImageItem(image, ImageSource.GALLERY, uri, if (isSelected) ImageItem.SELECTED  else ImageItem.NOT_SELECTED, selectedPosition))
+        list.add(ImageItem(image, ImageSource.GALLERY, uri, isSelected))
         isSelected = false
     }
 
