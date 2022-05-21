@@ -25,7 +25,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.erendev.composegallery.data.model.ImageItem
 import com.erendev.composegallery.ui.theme.Green
 import com.erendev.composegallery.ui.theme.White
@@ -52,9 +55,13 @@ fun GalleryImageListItem(
     }
 
     Box(modifier = Modifier.padding(vertical = 3.dp, horizontal = 2.dp)) {
-        GlideImage(
-            imageModel = item.uri,
-            contentScale = ContentScale.FillBounds,
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(item.uri)
+                .crossfade(true)
+                .build(),
+            contentDescription = "",
+            contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
                 .height(150.dp)
