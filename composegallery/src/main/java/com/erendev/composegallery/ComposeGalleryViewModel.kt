@@ -39,6 +39,7 @@ internal class ComposeGalleryViewModel(
     val isDoneEnabled: LiveData<Boolean> = _isDoneEnabled
 
     internal var mPage = 0
+    internal var mLoadedIndex = 0
 
     private var mSelectedAlbum: AlbumItem? = null
     private var mSelectedList = hashMapOf<String, ImageItem>()
@@ -61,6 +62,7 @@ internal class ComposeGalleryViewModel(
                         is GalleryResult.Error -> errorMessage.postValue(it.message)
                         is GalleryResult.Success -> {
                             _albums.postValue(it.data)
+                            mSelectedAlbum = it.data?.get(0)
                             loadAllImages()
                         }
                     }
@@ -86,6 +88,34 @@ internal class ComposeGalleryViewModel(
                         is GalleryResult.Success -> {
                             images.postValue(it.data)
                             _filteredImages.postValue(it.data)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    fun loadMoreImages(index: Int) {
+        mPage += 1
+        if (mSelectedAlbum != null && index > mLoadedIndex) {
+            viewModelScope.launch {
+                getImagesUseCase.execute(
+                    GetImagesUseCase.Params(
+                        contentResolver = contentResolver,
+                        albumItem = mSelectedAlbum,
+                        page = mPage,
+                        preSelectedImages = preSelectedImages,
+                        supportedImages = ALL_TYPES
+                    )
+                ).collect {
+                    when (it) {
+                        is GalleryResult.Error -> errorMessage.postValue(it.message)
+                        is GalleryResult.Success -> {
+                            val result = it.data?.toList() ?: emptyList()
+                            val mergedList = images.value?.plus(result)
+                            mLoadedIndex = index
+                            images.postValue(mergedList)
+                            _filteredImages.postValue(mergedList)
                         }
                     }
                 }
@@ -133,6 +163,7 @@ internal class ComposeGalleryViewModel(
             }
             list.add(0, item)
             images.postValue(list)
+            _filteredImages.postValue(list)
         }
     }
 }

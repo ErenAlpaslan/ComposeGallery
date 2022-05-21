@@ -32,8 +32,6 @@ import coil.request.ImageRequest
 import com.erendev.composegallery.data.model.ImageItem
 import com.erendev.composegallery.ui.theme.Green
 import com.erendev.composegallery.ui.theme.White
-import com.skydoves.landscapist.glide.GlideImage
-import com.skydoves.landscapist.palette.BitmapPalette
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,17 +46,11 @@ fun GalleryImageListItem(
 
     isSelected = item.selected
 
-    val state = remember {
-        MutableTransitionState(false).apply {
-            targetState = true
-        }
-    }
-
     Box(modifier = Modifier.padding(vertical = 3.dp, horizontal = 2.dp)) {
         AsyncImage(
             model = ImageRequest.Builder(LocalContext.current)
                 .data(item.uri)
-                .crossfade(true)
+                .crossfade(1000)
                 .build(),
             contentDescription = "",
             contentScale = ContentScale.Crop,
@@ -66,7 +58,6 @@ fun GalleryImageListItem(
                 .fillMaxSize()
                 .height(150.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .background(Color.Red)
                 .clickable {
                     isSelected = isSelected.not()
                     item.selected = isSelected

@@ -114,7 +114,6 @@ fun ComposeGallery(
                                 GalleryType.STANDARD -> {
                                     GalleryImageListStandard(
                                         list = list,
-                                        limit = limit,
                                         updatedList = {
                                             selectedImages.value = it
                                             isDone = selectedImages.value.isNotEmpty()
@@ -122,6 +121,9 @@ fun ComposeGallery(
                                         onImageCaptured = {
                                             viewModel.addCameraItem(it)
                                             isDone = selectedImages.value.isNotEmpty()
+                                        },
+                                        onLoadMore = {
+                                            viewModel.loadMoreImages(it)
                                         }
                                     )
                                 }
