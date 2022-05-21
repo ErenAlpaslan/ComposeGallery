@@ -11,6 +11,8 @@ import android.os.Environment
 import android.os.Environment.DIRECTORY_PICTURES
 import android.provider.MediaStore
 import android.util.Log
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import com.erendev.composegallery.common.GalleryDefaults
 import com.erendev.composegallery.common.GalleryDefaults.ALL_TYPES
 import java.io.File
@@ -31,32 +33,6 @@ internal fun Cursor.doWhile(action: () -> Unit) {
     }
 }
 
-internal fun getSupportedImagesExt(supportedExt: List<String>): String {
-    var result = ""
-    return if (supportedExt.isEmpty()) {
-        result = ALL_TYPES
-        result
-    } else {
-        supportedExt.forEach {
-            result += "$it/"
-        }
-        result
-    }
-}
-
-@Throws(IOException::class)
-internal fun createTempImageFile(context : Context): File {
-    val timeStamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.ENGLISH).format(Date())
-    val imageFileName = "JPEG_" + timeStamp + "_"
-    val storageDir = context.getExternalFilesDir(DIRECTORY_PICTURES)
-    val image = File.createTempFile(
-        imageFileName,
-        ".jpg",
-        storageDir
-    )
-    return image
-}
-
 fun saveToGallery(context: Context, bitmap: Bitmap, albumName: String): Uri? {
     val filename = "${System.currentTimeMillis()}.png"
     val write: (OutputStream) -> Boolean = {
@@ -72,7 +48,6 @@ fun saveToGallery(context: Context, bitmap: Bitmap, albumName: String): Uri? {
 
         context.contentResolver.let {
             it.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)?.let { uri ->
-                Log.d("SaveControl", "=> $uri")
                 it.openOutputStream(uri)?.let(write)
                 return uri
             }
@@ -89,3 +64,16 @@ fun saveToGallery(context: Context, bitmap: Bitmap, albumName: String): Uri? {
 
     return null
 }
+
+fun getCursorUri(): Uri {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        GalleryDefaults.NEW_CURSOR_URI
+    } else {
+        GalleryDefaults.CURSOR_URI
+    }
+}
+
+inline fun <VM : ViewModel> viewModelFactory(crossinline f: () -> VM) =
+    object : ViewModelProvider.Factory {
+        override fun <T : ViewModel> create(aClass: Class<T>):T = f() as T
+    }

@@ -30,6 +30,7 @@ import com.erendev.composegallery.data.model.ImageItem
 import com.erendev.composegallery.ui.theme.Green
 import com.erendev.composegallery.ui.theme.White
 import com.skydoves.landscapist.glide.GlideImage
+import com.skydoves.landscapist.palette.BitmapPalette
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -51,25 +52,20 @@ fun GalleryImageListItem(
     }
 
     Box(modifier = Modifier.padding(vertical = 3.dp, horizontal = 2.dp)) {
-        AnimatedVisibility(
-            visibleState = state,
-            enter = fadeIn(animationSpec = tween(1000)),
-            exit = fadeOut(animationSpec = tween(1000))
-        ) {
-            GlideImage(
-                imageModel = item.uri,
-                contentScale = ContentScale.FillBounds,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .height(150.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .clickable {
-                        isSelected = isSelected.not()
-                        item.selected = isSelected
-                        if (isSelected) onImageSelected(item) else onImageRemoved(item)
-                    },
-            )
-        }
+        GlideImage(
+            imageModel = item.uri,
+            contentScale = ContentScale.FillBounds,
+            modifier = Modifier
+                .fillMaxSize()
+                .height(150.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.Red)
+                .clickable {
+                    isSelected = isSelected.not()
+                    item.selected = isSelected
+                    if (isSelected) onImageSelected(item) else onImageRemoved(item)
+                },
+        )
 
         if (isSelected) {
             Box(modifier = Modifier.padding(6.dp)) {

@@ -50,7 +50,7 @@ internal class ImagesDataSource(private val contentResolver: ContentResolver){
                 return list
             }
             albumCursor.doWhile {
-                val bucketId = albumCursor.getString(albumCursor.getColumnIndex(MediaStore.Images.ImageColumns.BUCKET_ID))
+                val bucketId = albumCursor.getLong(albumCursor.getColumnIndexOrThrow(MediaStore.Images.ImageColumns.BUCKET_ID)).toString()
                 val name = albumCursor.getString(albumCursor.getColumnIndex(DISPLAY_NAME_COLUMN)) ?: bucketId
                 var albumItem = AlbumItem(name, false, bucketId)
                 if (!list.contains(albumItem)) {
@@ -127,7 +127,6 @@ internal class ImagesDataSource(private val contentResolver: ContentResolver){
                 val image = photoCursor.getString((photoCursor.getColumnIndex(PATH_COLUMN)))
                 val id = photoCursor.getLong(photoCursor.getColumnIndexOrThrow(ID_COLUMN))
                 val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                Log.d("ImageSourceControl", "image ==>$image // $id // $uri")
                 if (supportedImages != null) {
                     val imageType = image.substring(image.lastIndexOf(".") + 1)
                     if (supportedImages.contains(imageType)) {
@@ -150,7 +149,6 @@ internal class ImagesDataSource(private val contentResolver: ContentResolver){
                 photoCursor.close()
             }
         }
-        Log.d("ImageSourceControl", "Images ==> $list")
         return list
     }
 

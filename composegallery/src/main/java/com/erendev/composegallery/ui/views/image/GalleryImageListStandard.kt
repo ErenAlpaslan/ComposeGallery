@@ -4,6 +4,7 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import com.erendev.composegallery.common.GalleryDefaults.DEFAULT_COLUMN_COUNT
@@ -26,7 +27,7 @@ fun GalleryImageListStandard(
         LazyVerticalGrid(
             columns = GridCells.Fixed(DEFAULT_COLUMN_COUNT)
         ) {
-            items(1) {
+            item(0) {
                 CameraButton { imageItem ->
                     if (imageItem !in selectedItems) {
                         selectedItems.add(imageItem)
@@ -35,27 +36,28 @@ fun GalleryImageListStandard(
                     onImageCaptured(imageItem)
                 }
             }
-            itemsIndexed(list) { _, imageItem ->
+            itemsIndexed(list) { index, imageItem ->
+                key((index + 1)) {
+                    GalleryImageListItem(
+                        item = imageItem,
+                        onImageSelected = {
+                            if (it !in selectedItems) {
+                                selectedItems.add(it)
+                            }
 
-                GalleryImageListItem(
-                    item = imageItem,
-                    onImageSelected = {
-                        if (it !in selectedItems) {
-                            selectedItems.add(it)
+                            updatedList(selectedItems)
+
+                        },
+
+                        onImageRemoved = {
+                            if (it in selectedItems) {
+                                selectedItems.remove(it)
+                            }
+
+                            updatedList(selectedItems)
                         }
-
-                        updatedList(selectedItems)
-
-                    },
-
-                    onImageRemoved = {
-                        if (it in selectedItems) {
-                            selectedItems.remove(it)
-                        }
-
-                        updatedList(selectedItems)
-                    }
-                )
+                    )
+                }
             }
         }
     } else {

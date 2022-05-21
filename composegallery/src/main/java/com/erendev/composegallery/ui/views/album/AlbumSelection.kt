@@ -1,4 +1,4 @@
-package com.erendev.composegallery.ui.views
+package com.erendev.composegallery.ui.views.album
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Text

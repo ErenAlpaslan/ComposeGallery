@@ -1,8 +1,6 @@
 package com.erendev.composegallery
 
 import android.annotation.SuppressLint
-import android.net.Uri
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,8 +20,11 @@ import com.erendev.composegallery.common.GalleryDefaults.DEFAULT_TOOLBAR_ENABLED
 import com.erendev.composegallery.common.enum.GalleryType
 import com.erendev.composegallery.data.model.ImageItem
 import com.erendev.composegallery.ui.theme.Black
-import com.erendev.composegallery.ui.views.AlbumSelection
+import com.erendev.composegallery.ui.views.album.AlbumSelection
 import com.erendev.composegallery.ui.views.image.GalleryImageListStandard
+import com.erendev.composegallery.usecases.GetAlbumsUseCase
+import com.erendev.composegallery.usecases.GetImagesUseCase
+import com.erendev.composegallery.utils.extensions.viewModelFactory
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -42,10 +43,17 @@ fun ComposeGallery(
     toolbarEnabled: Boolean = DEFAULT_TOOLBAR_ENABLED,
     onDone: (List<ImageItem>) -> Unit,
 ) {
-    val viewModel: ComposeGalleryViewModel = viewModel()
+    val viewModel: ComposeGalleryViewModel = viewModel(factory = viewModelFactory {
+        ComposeGalleryViewModel(
+            GetAlbumsUseCase(),
+            GetImagesUseCase()
+        )
+    })
+
     var selectedImages = remember {
         mutableStateOf<List<ImageItem>>(emptyList())
     }
+
     var isDone by remember {
         mutableStateOf(false)
     }
@@ -53,7 +61,7 @@ fun ComposeGallery(
     viewModel.init(LocalContext.current.contentResolver)
 
     val albums by viewModel.albums.observeAsState()
-    val images by viewModel.images.observeAsState()
+    val images by viewModel.filteredImages.observeAsState()
     val isDoneEnabled by viewModel.isDoneEnabled.observeAsState()
 
     val storagePermissionState = rememberPermissionState(

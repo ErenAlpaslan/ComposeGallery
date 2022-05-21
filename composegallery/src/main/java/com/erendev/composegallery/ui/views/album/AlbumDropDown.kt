@@ -13,6 +13,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import com.erendev.composegallery.data.model.AlbumItem
+import com.erendev.composegallery.ui.theme.Black
 
 @Composable
 fun AlbumDropDown(
@@ -31,15 +32,18 @@ fun AlbumDropDown(
         Row(modifier = Modifier.clickable {
             expanded.value = true
         }) {
-            Text(text = items?.get(selectedIndex)?.name ?: "")
-            Icon(imageVector = Icons.Default.ArrowDropDown, contentDescription = "Drop down arrow")
+            Text(text = items?.get(selectedIndex)?.name ?: "", color = Black)
+            Icon(
+                imageVector = Icons.Default.ArrowDropDown,
+                contentDescription = "Drop down arrow",
+                tint = Black
+            )
         }
         DropdownMenu(
             expanded = expanded.value,
             onDismissRequest = {
-                Log.d("AlbumDropDown", "Drop ==> ${expanded.value}")
                 expanded.value = false
-            },
+            }
         ) {
             items?.forEachIndexed { index, item ->
                 DropdownMenuItem(
@@ -47,7 +51,6 @@ fun AlbumDropDown(
                         Text(text = item.name)
                     },
                     onClick = {
-                        Log.d("AlbumDropDown", "Drop ==> ${expanded.value}")
                         expanded.value = false
                         selectedIndex = index
                         onAlbumSelected(item)
