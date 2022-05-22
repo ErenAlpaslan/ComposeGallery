@@ -96,8 +96,8 @@ internal class ComposeGalleryViewModel(
     }
 
     fun loadMoreImages(index: Int) {
-        mPage += 1
         if (mSelectedAlbum != null && index > mLoadedIndex) {
+            mPage += 1
             viewModelScope.launch {
                 getImagesUseCase.execute(
                     GetImagesUseCase.Params(
