@@ -20,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -42,14 +43,17 @@ fun BigImageView(
         mutableStateOf(1f)
     }
 
+    var offset by remember(key1 = imageItem) { mutableStateOf(Offset.Zero) }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Black)
             .focusable(true)
             .pointerInput(Unit) {
-                detectTransformGestures { _, _, zoom, _ ->
+                detectTransformGestures { _, pan, zoom, _ ->
                     scale *= zoom
+                    offset += pan
                 }
             },
         contentAlignment = Alignment.Center,
@@ -67,6 +71,8 @@ fun BigImageView(
                     // adding some zoom limits (min 50%, max 200%)
                     scaleX = maxOf(.5f, minOf(3f, scale)),
                     scaleY = maxOf(.5f, minOf(3f, scale)),
+                    translationX = offset.x,
+                    translationY = offset.y
                 )
         )
     }
