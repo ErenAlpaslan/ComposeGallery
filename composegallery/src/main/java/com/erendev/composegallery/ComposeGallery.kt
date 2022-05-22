@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +22,7 @@ import com.erendev.composegallery.common.enum.GalleryType
 import com.erendev.composegallery.data.model.ImageItem
 import com.erendev.composegallery.ui.theme.Black
 import com.erendev.composegallery.ui.views.album.AlbumSelection
+import com.erendev.composegallery.ui.views.image.BigImageView
 import com.erendev.composegallery.ui.views.image.GalleryImageListStandard
 import com.erendev.composegallery.usecases.GetAlbumsUseCase
 import com.erendev.composegallery.usecases.GetImagesUseCase
@@ -68,16 +70,37 @@ fun ComposeGallery(
         android.Manifest.permission.READ_EXTERNAL_STORAGE
     )
 
+    var isLongPressed by remember {
+        mutableStateOf(false)
+    }
+
+    var bigImageItem by remember {
+        mutableStateOf<ImageItem?>(null)
+    }
+
     Scaffold(
         modifier = modifier,
         topBar = {
             CenterAlignedTopAppBar(
                 title = {},
                 navigationIcon = {
-                    AlbumSelection(
-                        items = albums
-                    ) { selectedAlbum ->
-                        viewModel.onAlbumChanged(selectedAlbum)
+                    if (isLongPressed) {
+                        IconButton(
+                            onClick = { isLongPressed = false }
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.ArrowBack,
+                                contentDescription = "Arrow Back",
+                                tint = Black
+                            )
+                        }
+                    }else {
+                        AlbumSelection(
+                            items = albums
+                        ) { selectedAlbum ->
+                            viewModel.onAlbumChanged(selectedAlbum)
+                            isLongPressed = false
+                        }
                     }
                 },
                 actions = {
@@ -124,6 +147,10 @@ fun ComposeGallery(
                                         },
                                         onLoadMore = {
                                             viewModel.loadMoreImages(it)
+                                        },
+                                        onLongClicked = {
+                                            isLongPressed = true
+                                            bigImageItem = it
                                         }
                                     )
                                 }
@@ -140,6 +167,9 @@ fun ComposeGallery(
                         storagePermissionState.launchPermissionRequest()
                     }
                 }
+            }
+            if (isLongPressed) {
+                BigImageView(imageItem = bigImageItem)
             }
         }
     )

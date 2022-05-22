@@ -1,16 +1,18 @@
 package com.erendev.composegallery.ui.views.image
 
 import android.graphics.Bitmap
+import android.media.Image
 import android.net.Uri
 import android.util.Log
+import android.view.MotionEvent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.MutableTransitionState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -20,10 +22,13 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -32,19 +37,25 @@ import coil.request.ImageRequest
 import com.erendev.composegallery.data.model.ImageItem
 import com.erendev.composegallery.ui.theme.Green
 import com.erendev.composegallery.ui.theme.White
+import kotlinx.coroutines.delay
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(
+    ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class,
+    ExperimentalComposeUiApi::class
+)
 @Composable
 fun GalleryImageListItem(
     item: ImageItem,
     onImageSelected: (ImageItem) -> Unit,
-    onImageRemoved: (ImageItem) -> Unit
+    onImageRemoved: (ImageItem) -> Unit,
+    onLongClicked: (ImageItem) -> Unit
 ) {
     var isSelected by remember {
         mutableStateOf(false)
     }
 
     isSelected = item.selected
+
 
     Box(modifier = Modifier.padding(vertical = 3.dp, horizontal = 2.dp)) {
         AsyncImage(
@@ -58,11 +69,16 @@ fun GalleryImageListItem(
                 .fillMaxSize()
                 .height(150.dp)
                 .clip(RoundedCornerShape(10.dp))
-                .clickable {
-                    isSelected = isSelected.not()
-                    item.selected = isSelected
-                    if (isSelected) onImageSelected(item) else onImageRemoved(item)
-                },
+                .combinedClickable(
+                    onClick = {
+                        isSelected = isSelected.not()
+                        item.selected = isSelected
+                        if (isSelected) onImageSelected(item) else onImageRemoved(item)
+                    },
+                    onLongClick = {
+                        onLongClicked(item)
+                    }
+                )
         )
 
         if (isSelected) {

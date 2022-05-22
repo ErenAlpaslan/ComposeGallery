@@ -19,6 +19,7 @@ fun GalleryImageListStandard(
     updatedList: (List<ImageItem>) -> Unit,
     onImageCaptured: (ImageItem) -> Unit,
     onLoadMore: (Int) -> Unit,
+    onLongClicked: (ImageItem) -> Unit
 ) {
     val selectedItems = remember {
         mutableListOf<ImageItem>()
@@ -71,6 +72,10 @@ fun GalleryImageListStandard(
                             }
 
                             updatedList(selectedItems)
+                        },
+
+                        onLongClicked = {
+                            onLongClicked(it)
                         }
                     )
                 }
